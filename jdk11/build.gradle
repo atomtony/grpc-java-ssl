@@ -1,0 +1,67 @@
+plugins {
+    id 'application'
+    id 'com.google.protobuf' version '0.8.8'
+    id 'idea'
+}
+
+repositories {
+    maven {
+        url "https://maven-central.storage-download.googleapis.com/repos/central/data/"
+    }
+    mavenLocal()
+}
+
+sourceCompatibility = 1.11
+targetCompatibility = 1.11
+
+def grpcVersion = '1.20.0'
+def protocVersion = '3.7.1'
+def javaXVersion = '1.2'
+
+dependencies {
+    implementation "io.grpc:grpc-netty:${grpcVersion}"
+    implementation "io.grpc:grpc-protobuf:${grpcVersion}"
+    implementation "io.grpc:grpc-stub:${grpcVersion}"
+    compileOnly "javax.annotation:javax.annotation-api:${javaXVersion}"
+}
+
+protobuf {
+    protoc { artifact = "com.google.protobuf:protoc:${protocVersion}" }
+    plugins {
+        grpc { artifact = "io.grpc:protoc-gen-grpc-java:${grpcVersion}" }
+    }
+    generateProtoTasks {
+        all()*.plugins { grpc {} }
+    }
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs 'build/generated/source/proto/main/grpc'
+            srcDirs 'build/generated/source/proto/main/java'
+        }
+    }
+}
+
+startScripts.enabled = false
+
+task helloWorldTlsServer(type: CreateStartScripts) {
+    mainClassName = 'io.grpc.examples.jdk11.HelloWorldServerTls'
+    applicationName = 'hello-world-tls-server'
+    outputDir = new File(project.buildDir, 'tmp')
+    classpath = startScripts.classpath
+}
+
+task helloWorldTlsClient(type: CreateStartScripts) {
+    mainClassName = 'io.grpc.examples.jdk11.HelloWorldClientTls'
+    applicationName = 'hello-world-tls-client'
+    outputDir = new File(project.buildDir, 'tmp')
+    classpath = startScripts.classpath
+}
+
+applicationDistribution.into('bin') {
+    from(helloWorldTlsServer)
+    from(helloWorldTlsClient)
+    fileMode = 0755
+}
