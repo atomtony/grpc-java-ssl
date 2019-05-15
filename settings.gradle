@@ -1,0 +1,8 @@
+rootProject.name = 'grpc_java_ssl'
+
+include 'conscrypt'
+include 'native_jdk11'
+include 'tomcatnative_boringssl'
+include 'tomcatnative_boringssl_jdk11'
+include 'tomcatnative_openssl'
+include 'tomcatnative_openssl_jdk11'
